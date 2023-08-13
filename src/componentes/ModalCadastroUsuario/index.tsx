@@ -1,11 +1,17 @@
-import { AbBotao, AbCampoTexto, AbModal } from 'ds-alurabooks'
-import { useState } from 'react'
+import { AbBotao, AbCampoTexto, AbModal } from "ds-alurabooks"
+import { useState } from "react"
+import axios from 'axios'
 
 import imagemPrincipal from './assets/login.png'
 
 import './ModalCadastroUsuario.css'
 
-const ModalCadastroUsuario = () => {
+interface PropsModalCadastroUsuario {
+    aberta: boolean
+    aoFechar: () => void
+}
+
+const ModalCadastroUsuario = ({ aberta, aoFechar } : PropsModalCadastroUsuario) => {
 
     const [nome, setNome] = useState('')
     const [email, setEmail] = useState('')
@@ -15,56 +21,87 @@ const ModalCadastroUsuario = () => {
     const [senha, setSenha] = useState('')
     const [senhaConfirmada, setSenhaConfirmada] = useState('')
 
-    return (<AbModal
-        titulo="Cadastrar"
-        aberta={true}
-        aoFechar={() => console.log('fecha ai')}
+    const aoSubmeterFormular = (evento: React.FormEvent<HTMLFormElement>) => {
+        evento.preventDefault()
+        const usuario = {
+            nome,
+            email,
+            senha,
+            endereco,
+            cep,
+            complemento
+        }
+
+        axios.post('http://localhost:8000/public/registrar', usuario)
+            .then(() => {
+                alert('Usuário foi cadastrado com sucesso!')
+                setNome('')
+                setEmail('')
+                setEndereco('')
+                setComplemento('')
+                setCep('')
+                setSenha('')
+                setSenhaConfirmada('')
+                aoFechar()
+            })
+            .catch(() => {
+                alert('OPS! Alguma coisa deu errado!')
+            })
+    }
+
+    return (<AbModal 
+        titulo="Cadastrar" 
+        aberta={aberta}
+        aoFechar={aoFechar}    
     >
-        <div className='corpoModalCadastro'>
+        <section className="corpoModalCadastro">
             <figure>
-                <img src={imagemPrincipal} alt="Monitor com uma fechadura e uma pessoa com uma chave logo ao lado." />
+                <img src={imagemPrincipal} alt="Pessoa segurando uma chave na frente de uma tela de computador que está exibindo uma fechadura" />
             </figure>
-            <form>
-                <AbCampoTexto
+            <form onSubmit={aoSubmeterFormular}>
+                <AbCampoTexto 
+                    label="Nome"
                     value={nome}
-                    label='Nome'
                     onChange={setNome}
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="E-mail"
                     value={email}
-                    label='E-mail'
                     onChange={setEmail}
+                    type="email"
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="Endereço"
                     value={endereco}
-                    label='Endereço'
                     onChange={setEndereco}
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="Complemento"
                     value={complemento}
-                    label='Complemento'
                     onChange={setComplemento}
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="CEP"
                     value={cep}
-                    label='CEP'
                     onChange={setCep}
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="Senha"
                     value={senha}
-                    label='Senha'
                     onChange={setSenha}
+                    type="password"
                 />
-                <AbCampoTexto
+                <AbCampoTexto 
+                    label="Confirmação da senha"
                     value={senhaConfirmada}
-                    label='Confirmar senha'
                     onChange={setSenhaConfirmada}
+                    type="password"
                 />
-                <footer>
-                    <AbBotao texto='Cadastrar' />
-                </footer>
+                <div className="acoes">
+                    <AbBotao texto="Cadastrar"/>
+                </div>
             </form>
-        </div>
+        </section>
     </AbModal>)
 }
 
